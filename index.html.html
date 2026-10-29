@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حاسبة الكميات الهندسية</title>
+<meta name="theme-color" content="#1f2a33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1f2a33;--ink2:#4a5863;--paper:#f3f4f2;--card:#ffffff;--line:#d9dde0;--accent:#e0a800;--ok:#2e7d5b;--bad:#b3261e;--r:10px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Kufi Arabic",Tahoma,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.7}
+header{background:var(--ink);color:#fff;padding:18px 20px 14px;border-bottom:5px solid var(--accent)}
+header h1{margin:0;font-size:22px;font-weight:800}
+header p{margin:4px 0 0;color:#c5ced5;font-size:13px}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{font:inherit;font-size:14px;padding:7px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--ink)}
+nav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{max-width:860px;margin:0 auto;padding:16px}
+section{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+section.on{display:block}
+h2{margin:0 0 4px;font-size:19px}
+.note{color:var(--ink2);font-size:13px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink2)}
+input,select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #bfc6cc;border-radius:8px;background:#fff;color:var(--ink);width:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{font:inherit;font-weight:600;padding:9px 16px;border-radius:8px;border:0;background:var(--ink);color:#fff;cursor:pointer}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid #bfc6cc}
+.btn.acc{background:var(--accent);color:var(--ink)}
+.res{margin-top:16px;border-top:2px dashed var(--line);padding-top:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}
+th{color:var(--ink2);font-weight:600;font-size:13px}
+td.n{font-weight:800;font-variant-numeric:tabular-nums}
+.warn{background:#fff6dc;border-right:4px solid var(--accent);padding:10px 12px;border-radius:6px;font-size:13px;margin-top:12px}
+.err{color:var(--bad);font-size:14px;margin-top:10px}
+.tag{display:inline-block;font-size:12px;background:#e8ecef;padding:2px 8px;border-radius:20px;color:var(--ink2)}
+#cart table input{padding:4px 6px;width:120px}
+.tot{font-size:18px;font-weight:800;margin-top:10px;text-align:left}
+footer{text-align:center;color:var(--ink2);font-size:12px;padding:20px}
+@media print{header nav,nav,.btns,.warn-noprint{display:none!important}section{display:none!important;border:0}section.print{display:block!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<header>
+  <h1>حاسبة الكميات الهندسية</h1>
+  <p>حساب تفصيلي للكميات والتخمين وفق الممارسات المعتمدة في العراق (الأوزان والنسب المعيارية) — النتائج تقديرية والمرجع النهائي المخطط والمهندس المشرف</p>
+</header>
+
+<nav id="nav">
+  <button class="on" data-t="conc">الخرسانة</button>
+  <button data-t="blk">البلوك</button>
+  <button data-t="plas">اللياسة</button>
+  <button data-t="steel">حديد التسليح</button>
+  <button data-t="tile">البلاط</button>
+  <button data-t="paint">الدهان</button>
+  <button data-t="cart">التخمين والمستخلص</button>
+</nav>
+
+<main>
+
+<!-- الخرسانة -->
+<section id="conc" class="on">
+  <h2>كميات الخرسانة</h2>
+  <p class="note">الحجم = الطول × العرض × السماكة. يُحوَّل الحجم الرطب إلى جاف بمعامل 1.54 لحساب المواد.</p>
+  <div class="grid">
+    <label>الطول (م)<input type="number" step="any" id="c_l" value="5"></label>
+    <label>العرض (م)<input type="number" step="any" id="c_w" value="4"></label>
+    <label>السماكة (م)<input type="number" step="any" id="c_t" value="0.15"></label>
+    <label>عدد الوحدات المتماثلة<input type="number" min="1" id="c_n" value="1"></label>
+    <label>نسبة الخلطة (إسمنت : رمل : حصى)
+      <select id="c_mix">
+        <option value="1,2,4">1 : 2 : 4 (عام، أساسات ومداميك)</option>
+        <option value="1,1.5,3" selected>1 : 1.5 : 3 (إنشائي، أعمدة وسقوف)</option>
+        <option value="1,2,3">1 : 2 : 3 (عالي المقاومة)</option>
+      </select></label>
+    <label>نسبة الهدر %<input type="number" min="0" id="c_waste" value="5"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="conc">احسب</button></div>
+  <div class="res" id="r_conc"></div>
+</section>
+
+<!-- البلوك -->
+<section id="blk">
+  <h2>كميات البلوك والملاط</h2>
+  <p class="note">تُحسب المساحة الصافية للجدار بعد طرح الفتحات (الأبواب والشبابيك).</p>
+  <div class="grid">
+    <label>طول الجدار الكلي (م)<input type="number" step="any" id="b_l" value="10"></label>
+    <label>ارتفاع الجدار (م)<input type="number" step="any" id="b_h" value="3"></label>
+    <label>عدد الأبواب<input type="number" min="0" id="b_d" value="2"></label>
+    <label>مساحة الباب الواحد (م²)<input type="number" step="any" id="b_da" value="2.1"></label>
+    <label>عدد الشبابيك<input type="number" min="0" id="b_wn" value="3"></label>
+    <label>مساحة الشباك الواحد (م²)<input type="number" step="any" id="b_wa" value="1.5"></label>
+    <label>مقاس البلوك
+      <select id="b_size">
+        <option value="20">40 × 20 × 20 سم (جدار حامل/خارجي)</option>
+        <option value="15">40 × 20 × 15 سم</option>
+        <option value="10" selected>40 × 20 × 10 سم (قاطع داخلي)</option>
+      </select></label>
+    <label>نسبة الهدر %<input type="number" min="0" id="b_waste" value="5"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="blk">احسب</button></div>
+  <div class="res" id="r_blk"></div>
+</section>
+
+<!-- اللياسة -->
+<section id="plas">
+  <h2>كميات اللياسة (المونة الإسمنتية)</h2>
+  <p class="note">المونة المعتمدة عادةً 1 : 3 (إسمنت : رمل). معامل الانتفاخ الجاف 1.3.</p>
+  <div class="grid">
+    <label>المساحة (م²)<input type="number" step="any" id="p_a" value="120"></label>
+    <label>سماكة اللياسة (سم)<input type="number" step="any" id="p_t" value="2"></label>
+    <label>نسبة الهدر %<input type="number" min="0" id="p_waste" value="8"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="plas">احسب</button></div>
+  <div class="res" id="r_plas"></div>
+</section>
+
+<!-- الحديد -->
+<section id="steel">
+  <h2>أوزان حديد التسليح</h2>
+  <p class="note">الوزن (كغم/م) = قطر² ÷ 162 (القطر بالمليمتر). أدخل الأطوال الكلية لكل قطر من قائمة القص.</p>
+  <div class="grid" id="s_inputs"></div>
+  <div class="grid" style="margin-top:12px">
+    <label>نسبة الهدر والتراكب %<input type="number" min="0" id="s_waste" value="5"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="steel">احسب</button></div>
+  <div class="res" id="r_steel"></div>
+</section>
+
+<!-- البلاط -->
+<section id="tile">
+  <h2>كميات البلاط</h2>
+  <p class="note">يُضاف هدر القص للزوايا والحواف؛ 5% للبلاط المستقيم، و10% للقطري أو الكثير القص.</p>
+  <div class="grid">
+    <label>مساحة الأرضية (م²)<input type="number" step="any" id="t_a" value="30"></label>
+    <label>طول البلاطة (سم)<input type="number" step="any" id="t_l" value="60"></label>
+    <label>عرض البلاطة (سم)<input type="number" step="any" id="t_w" value="60"></label>
+    <label>عدد البلاطات بالكرتون<input type="number" step="any" id="t_box" value="4"></label>
+    <label>نسبة الهدر %<input type="number" min="0" id="t_waste" value="7"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="tile">احسب</button></div>
+  <div class="res" id="r_tile"></div>
+</section>
+
+<!-- الدهان -->
+<section id="paint">
+  <h2>كميات الدهان</h2>
+  <p class="note">التغطية التقريبية 10 م² للتر لكل وجه (تختلف حسب نوع الدهان وسطحه). يُحسب الوجه بعد طرح الفتحات.</p>
+  <div class="grid">
+    <label>مساحة الجدران الصافية (م²)<input type="number" step="any" id="pt_a" value="180"></label>
+    <label>عدد الأوجه<input type="number" min="1" id="pt_c" value="2"></label>
+    <label>التغطية م²/لتر<input type="number" step="any" id="pt_cov" value="10"></label>
+    <label>نسبة الهدر %<input type="number" min="0" id="pt_waste" value="10"></label>
+  </div>
+  <div class="btns"><button class="btn" data-calc="paint">احسب</button></div>
+  <div class="res" id="r_paint"></div>
+</section>
+
+<!-- التخمين -->
+<section id="cart">
+  <h2>التخمين والمستخلص</h2>
+  <p class="note">أضف البنود من كل تبويب بالزر «أضف للتخمين»، ثم أدخل سعر الوحدة بالدينار العراقي لحساب التكلفة الإجمالية.</p>
+  <div id="cartBody"><p class="note">لم تُضف أي بنود بعد.</p></div>
+  <div class="btns">
+    <button class="btn acc" onclick="window.print()">طباعة المستخلص</button>
+    <button class="btn alt" onclick="clearCart()">تفريغ القائمة</button>
+  </div>
+</section>
+
+</main>
+<footer>تطبيق تقديري للاسترشاد — يجب مراجعة الكميات من قبل المهندس المختص قبل الشراء أو التعاقد.</footer>
+
+<script>
+const cart=[];
+const $=id=>document.getElementById(id);
+const v=id=>parseFloat($(id).value)||0;
+const f=(x,d=2)=>Number(x).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const BAG=0.0347; // m3 للكيس الإسمنت 50 كغم
+const DRY=1.54;   // معامل الحجم الجاف للخرسانة
+const WET_PLAS=1.3;
+
+// تبويب
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  if(b.dataset.t==='cart')renderCart();
+});
+
+function table(rows){
+  return '<table><tr><th>البند</th><th>الكمية</th><th>الوحدة</th></tr>'+
+    rows.map(r=>`<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td>${r[2]}</td></tr>`).join('')+'</table>';
+}
+function out(id,rows,name,warn){
+  const el=$('r_'+id);
+  el.innerHTML=table(rows)+
+    `<div class="btns"><button class="btn acc" data-add="${id}">أضف للتخمين</button></div>`+
+    (warn?`<div class="warn">${warn}</div>`:'');
+  el.dataset.items=JSON.stringify(rows.map(r=>({n:r[0],q:r[1],u:r[2],cat:name})));
+  el.querySelector('[data-add]').onclick=()=>{
+    JSON.parse(el.dataset.items).forEach(i=>cart.push({...i,p:0}));
+    el.querySelector('[data-add]').textContent='تمت الإضافة ✓';
+  };
+}
+function err(id,msg){$('r_'+id).innerHTML=`<p class="err">${msg}</p>`;}
+
+const calcs={
+conc(){
+  const L=v('c_l'),W=v('c_w'),T=v('c_t'),N=Math.max(1,v('c_n')),h=v('c_waste')/100;
+  if(!L||!W||!T)return err('conc','أدخل الأبعاد بشكل صحيح');
+  const wet=L*W*T*N, wetW=wet*(1+h), dry=wetW*DRY;
+  const [c,s,g]=$('c_mix').value.split(',').map(Number), sum=c+s+g;
+  const cem=dry*c/sum, sand=dry*s/sum, gra=dry*g/sum;
+  out('conc',[
+    ['حجم الخرسانة الرطبة (بعد الهدر)',f(wetW),'م³'],
+    ['الإسمنت',Math.ceil(cem/BAG),'كيس (50 كغم)'],
+    ['الرمل',f(sand),'م³'],
+    ['الحصى (الركام)',f(gra),'م³'],
+    ['الماء التقريبي (نحو 0.5 من وزن الإسمنت)',f(cem*1440*0.5,0),'لتر تقريباً']
+  ],'خرسانة',
+  wet>0&&T>0.3?'السماكة أكبر من 30 سم: تأكد من تقسيم الصب على طبقات حسب المخطط.':
+  'الكميات تقريبية، والنسبة النهائية تُحدد بتصميم الخلطة في المختبر.');
+},
+blk(){
+  const L=v('b_l'),H=v('b_h'),h=v('b_waste')/100;
+  const gross=L*H, open=v('b_d')*v('b_da')+v('b_wn')*v('b_wa');
+  const net=gross-open;
+  if(net<=0)return err('blk','مساحة الفتحات أكبر من مساحة الجدار');
+  const size=v('b_size'); // سماكة البلوك بالسم
+  const blocks=net/(0.4*0.2)*(1+h);
+  const mortar=net*0.025; // م³ ملاط تقريباً لكل م² (الفواصل 1 سم)
+  const cem=mortar*1.3*0.25; // مونة 1:4 تقريباً (حجم الإسمنت الجاف)
+  out('blk',[
+    ['المساحة الصافية للجدار',f(net),'م²'],
+    [`البلوك 40×20×${size} سم`,Math.ceil(blocks),'قطعة'],
+    ['الملاط الإسمنتي',f(mortar),'م³'],
+    ['الإسمنت للملاط',Math.ceil(cem/BAG),'كيس (50 كغم)'],
+    ['الرمل للملاط',f(mortar*1.3*0.75),'م³']
+  ],'بلوك',
+  'أضف الكميات الخاصة بالعتبات والأعمدة الخرسانية وحديد التسليح الأفقي حسب المخطط الإنشائي.');
+},
+plas(){
+  const A=v('p_a'),t=v('p_t')/100,h=v('p_waste')/100;
+  if(!A||!t)return err('plas','أدخل المساحة والسماكة');
+  const dry=A*t*WET_PLAS*(1+h);
+  const cem=dry/4, sand=dry*0.75;
+  out('plas',[
+    ['حجم المونة الجافة (بعد الهدر)',f(dry),'م³'],
+    ['الإسمنت (1:3)',Math.ceil(cem/BAG),'كيس (50 كغم)'],
+    ['الرمل',f(sand),'م³']
+  ],'لياسة','اللياسة الخارجية تحتاج عادةً سماكة 2 سم مع مونة أقوى، والداخلية 1.5 سم.');
+},
+steel(){
+  const d=[8,10,12,14,16,18,20,25];
+  const h=v('s_waste')/100;
+  let rows=[],tot=0;
+  d.forEach(x=>{
+    const L=v('s_L'+x); if(!L)return;
+    const kg=L*(x*x/162)*(1+h); tot+=kg;
+    rows.push([`قطر ${x} مم (${f(x*x/162,3)} كغم/م)`,f(kg,1),'كغم']);
+  });
+  if(!rows.length)return err('steel','أدخل الأطوال لقطر واحد على الأقل');
+  rows.push(['الإجمالي',f(tot/1000,3),'طن']);
+  out('steel',rows,'حديد','أضف طول التراكب (40 قطر للشدّ و50 قطر للتسليح) في حساب الأطوال.');
+},
+tile(){
+  const A=v('t_a'),l=v('t_l')/100,w=v('t_w')/100,h=v('t_waste')/100;
+  if(!A||!l||!w)return err('tile','أدخل المساحة ومقاس البلاطة');
+  const area=l*w, n=Math.ceil(A*(1+h)/area), box=v('t_box')||1;
+  out('tile',[
+    ['عدد البلاطات (مع الهدر)',n,'قطعة'],
+    ['عدد الكراتين',Math.ceil(n/box),'كرتون'],
+    ['مساحة البلاط المطلوبة',f(A*(1+h)),'م²'],
+    ['مادة اللاصق (تقريباً 4 كغم/م²)',f(A*4,0),'كغم']
+  ],'بلاط');
+},
+paint(){
+  const A=v('pt_a'),c=v('pt_c'),cov=v('pt_cov'),h=v('pt_waste')/100;
+  if(!A||!cov)return err('paint','أدخل المساحة والتغطية');
+  const L=A*c*(1+h)/cov;
+  out('paint',[
+    ['المساحة المطلوب دهانها',f(A*c*(1+h)),'م²'],
+    ['كمية الدهان',f(L,1),'لتر'],
+    ['عدد علب 18 لتر',Math.ceil(L/18),'علبة'],
+    ['عدد علب 4 لتر',Math.ceil(L/4),'علبة']
+  ],'دهان','اعتمد التغطية الموصى بها من المورد، ويفضل خلط الدهانات من نفس الدفعة لتجنب اختلاف اللون.');
+}
+};
+
+// حقول الحديد
+$('s_inputs').innerHTML=[8,10,12,14,16,18,20,25].map(x=>
+  `<label>أطوال قطر ${x} مم (م)<input type="number" step="any" id="s_L${x}" value="${x<=12?100:0}"></label>`).join('');
+
+document.querySelectorAll('[data-calc]').forEach(b=>b.onclick=()=>calcs[b.dataset.calc]());
+document.querySelectorAll('section').forEach(s=>s.querySelectorAll('input,select').forEach(i=>i.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const b=s.querySelector('[data-calc]');b&&b.click();}})));
+
+function renderCart(){
+  const body=$('cartBody');
+  if(!cart.length){body.innerHTML='<p class="note">لم تُضف أي بنود بعد.</p>';return;}
+  let total=0;
+  body.innerHTML='<table><tr><th>البند</th><th>الكمية</th><th>الوحدة</th><th>سعر الوحدة (د.ع)</th><th>المجموع</th></tr>'+
+    cart.map((r,i)=>{const t=(r.q*r.p)||0; total+=t;
+      return `<tr><td>${r.n}</td><td>${f(r.q,r.q%1?2:0)}</td><td>${r.u}</td>
+      <td><input type="number" min="0" value="${r.p||''}" data-i="${i}"></td><td class="n">${f(t,0)}</td></tr>`}).join('')+
+    '</table><div class="tot">الإجمالي: '+f(total,0)+' دينار عراقي</div>';
+  body.querySelectorAll('input[data-i]').forEach(inp=>inp.oninput=()=>{cart[inp.dataset.i].p=parseFloat(inp.value)||0;renderCart();});
+}
+function clearCart(){cart.length=0;renderCart();document.querySelectorAll('[data-add]').forEach(b=>b.textContent='أضف للتخمين');}
+
+// إعادة الحساب الأولي
+['conc','blk','plas','tile','paint'].forEach(k=>calcs[k]());
+</script>
+</body>
+</html>
